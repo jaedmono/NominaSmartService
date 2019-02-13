@@ -1,0 +1,145 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.9.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.0.1")
+    }
+}
+
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+def resourcesDir = 'src/main/resources/'
+def initialArchiveName = ''
+def appName = 'smartservicenomina'
+
+description = 'Smart Service Nomina Service'
+group = 'com.smartservice.nomina'
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+jar.enabled = true
+
+war {
+    baseName = appName
+}
+
+jar {
+    baseName = appName
+}
+
+distZip {
+    archiveName "${appName}-Build.zip"
+}
+
+bootRun {
+    addResources = true
+}
+
+
+//Defining the source directories for each environment
+sourceSets {
+    defaultResources {
+        resources {
+            srcDir resourcesDir
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral() // added to avoid instability in local nexus instance
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:Dalston.SR4"
+    }
+}
+
+configurations {
+    providedRuntime
+    deployerJars
+}
+
+dependencies {
+
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-actuator-docs')
+    compile('org.springframework.boot:spring-boot-starter-batch')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-integration')
+    compile('org.springframework.boot:spring-boot-starter-jersey')
+    compile('org.springframework.boot:spring-boot-starter-jooq')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('io.javaslang:javaslang:2.0.0')
+    compile('org.apache.commons:commons-lang3:3.4')
+    compile('com.opencsv:opencsv:3.9')
+    runtime('org.springframework.boot:spring-boot-devtools')
+    runtime('org.postgresql:postgresql')
+    providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.powermock:powermock-mockito-release-full:1.6.4')
+
+    testCompile('com.google.guava:guava-testlib:21.0')
+
+}
+
+
+//Task used to create the jar for the local environment
+task local(type: Jar, dependsOn:war) {
+    def environment = 'local'
+
+    initialArchiveName = archiveName
+    //modifying the jar name in order to have the base name identical to the service project
+    baseName = appName + '-properties'+ '-' + environment
+
+    from (sourceSets.defaultResources.resources.srcDirs){
+        include "**"
+    }
+}
+
+//Task used to create the jar for the production environment
+task prod(type: Jar, dependsOn:local) {
+    def environment = 'prod'
+
+    //modifying the jar name in order to have the base name identical to the service project
+    baseName = appName + '-properties'+ '-' + environment
+
+    from (sourceSets.defaultResources.resources.srcDirs){
+        include "**"
+    }
+}
+
+
+//Modifying the build task to execute the task that moves the jars to the web application directory
+build.dependsOn += war
+build.dependsOn += local
+build.dependsOn += prod
+
+artifacts{
+    archives file('build/libs/'+appName+'-'+'local'+'.jar')
+    archives file('build/libs/'+appName+'-'+'prod'+'.jar')
+}
+
+bootRun {
+    if ( project.hasProperty('jvmArgs') ) {
+        jvmArgs = (project.jvmArgs.split("\\s+") as List)
+    }
+    addResources = true
+    main = 'com.smartservice.nomina.SmartServiceNominaApplication'
+}

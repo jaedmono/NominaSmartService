@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.smartservice.nomina.iml" filepath="$PROJECT_DIR$/.idea/modules/com.smartservice.nomina.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_defaultResources.iml" filepath="$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_defaultResources.iml" group="com.smartservice.nomina" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_main.iml" group="com.smartservice.nomina" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.smartservice.nomina_test.iml" group="com.smartservice.nomina" />
+    </modules>
+  </component>
+</project>
